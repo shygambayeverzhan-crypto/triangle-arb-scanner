@@ -1,0 +1,7 @@
+{
+  "name": "triangle-arb-scanner",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Serverless triangular arbitrage scanner for Binance Spot and Bybit Spot with Telegram alerts",
+  "engines": { "node": ">=20" }
+}
