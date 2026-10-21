@@ -1,28 +1,29 @@
 # Configuration
 
-Edit the `CONFIG` object near the top of `Code.gs` in your private Google Apps Script project.
+Set these in Vercel → Project → Settings → Environment Variables, then redeploy.
 
-| Setting | Default | Notes |
+| Variable | Default | Meaning |
 |---|---:|---|
-| `START_USDT` | `25` | Illustrative starting amount used for estimates |
-| `FEE_RATE` | `0.001` | Assumed fee per leg (0.1%); replace with your actual fee |
-| `SLIPPAGE_BUFFER_PCT` | `0.05` | Percentage points deducted from estimated return |
-| `MIN_NET_PROFIT_PCT` | `0.20` | Minimum estimated net percentage required for an alert |
-| `ALERT_COOLDOWN_MINUTES` | `5` | Minimum time between alerts for the same route |
-| `MAX_ALERTS_PER_RUN` | `5` | Caps alerts sent during one scan |
-| `ASSETS` | USDT, BTC, ETH, BNB, SOL, XRP, ADA, DOGE, USDC, FDUSD | Assets used to filter available pairs |
+| TELEGRAM_BOT_TOKEN | required | Telegram bot token; keep secret |
+| TELEGRAM_CHAT_ID | required | Destination chat ID |
+| CRON_SECRET | required | Bearer secret protecting /api/scan |
+| START_USDT | 25 | Illustrative starting amount |
+| FEE_RATE | 0.001 | Assumed fee per leg (0.1%) |
+| SLIPPAGE_BUFFER_PCT | 0.05 | Percentage points deducted from return |
+| MIN_NET_PROFIT_PCT | 0.20 | Alert threshold |
+| MAX_ALERTS_PER_RUN | 3 | Maximum messages per scan |
+| COOLDOWN_SECONDS | 300 | Cooldown when Redis is configured |
+| ASSETS | common USDT/BTC/ETH/etc. | Assets included in route search |
+| UPSTASH_REDIS_REST_URL | optional | Upstash Redis endpoint for persistent cooldown |
+| UPSTASH_REDIS_REST_TOKEN | optional | Upstash Redis REST token |
 
-## What the estimate means
+Each route multiplies its three conversion rates, applies the assumed fee three times, then subtracts the slippage buffer. This is a screening estimate, not an execution simulator.
 
-For each three-leg route, the script multiplies the conversion rates, applies the assumed fee three times, then subtracts the slippage buffer from the percentage return. It is an approximate screening calculation, not an execution simulator.
+## Limitations
+- Best bid/ask snapshots do not model full order-book depth.
+- Exchange filters, rounding, minimum order sizes, market impact, and latency are not fully simulated.
+- Fees vary by account and market.
+- Routes are scanned independently within each exchange.
+- Without Upstash Redis, cooldowns are not persistent across serverless requests.
 
-## Known limitations
-
-- Prices are best bid/ask snapshots; order-book depth and market impact are not simulated.
-- The code does not fully validate exchange lot-size, tick-size, minimum-notional, or precision filters.
-- Actual fees can differ by account, fee tier, discounts, and market.
-- Network latency and Apps Script scheduling mean quotes may be stale by the time an alert is read.
-- A positive estimate may disappear before a trade could be made.
-- This version scans triangular routes within each exchange, not between Binance and Bybit.
-
-Do not use the alert threshold as a promise of profitability. Verify live prices, fees, liquidity, and exchange rules independently.
+No trading orders are sent. Independently verify any opportunity before acting.
